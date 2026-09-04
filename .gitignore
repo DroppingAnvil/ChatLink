@@ -1,3 +1,24 @@
+# Build output
 build/
 cmake-build-*/
+
+# IDE
 .idea/
+.vscode/
+
+# Calculator-side build artifacts. The .c sources are tracked; the compiled
+# .tns is not, because building it requires the Ndless SDK container and a
+# stale binary is worse than none (see README: a wrong toolchain produces a
+# .tns that links cleanly and then crashes the calculator).
+calc/*.o
+calc/*.elf
+calc/*.zehn
+calc/*.tns
+
+# Local secrets. ANTHROPIC_API_KEY belongs in the environment, never in a file.
+.env
+*.key
+
+# Raw phone photos. rsc/*.jpg are the rotated, downscaled versions
+# actually used by the README.
+rsc/IMG_*.jpeg

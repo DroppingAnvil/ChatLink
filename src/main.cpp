@@ -1,3 +1,15 @@
+/*
+ * ChatLink - link a TI-Nspire CX to a PC over USB.
+ * Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. See the LICENSE file for the full text.
+ */
+
 // ChatLink CLI — manual driver for the two layers underneath it.
 //
 //   Link commands  talk to the calculator over USB (probe, ls, pull, push, rm,
@@ -9,6 +21,7 @@
 
 #include "link/nspire_link.h"
 #include "link/protocol.h"
+#include "model/anthropic.h"
 #include "os_input/os_input.h"
 
 #include <chrono>
@@ -42,6 +55,13 @@ int usage() {
         "  mkdir <remote>            Create a directory on the calculator\n"
         "  rmdir <remote>            Remove a directory on the calculator\n"
         "  shot <local.pgm>          Capture the calculator screen\n"
+        "\n"
+        "Bridge:\n"
+        "  serve [--once] [--echo]   Answer requests written by chatlink.tns on\n"
+        "                            the calculator, using the Claude API.\n"
+        "                            --echo replies without calling a model,\n"
+        "                            --once exits after a single reply.\n"
+        "                            Needs ANTHROPIC_API_KEY unless --echo.\n"
         "\n"
         "Input commands (drive this PC's keyboard and mouse):\n"
         "  type <text>               Type text into the focused window\n"
@@ -365,8 +385,17 @@ std::string answerClaude(const chatlink::model::Config& config, const std::strin
 // across sessions, and a fresh connection is the one thing that reliably
 // recovers it. Holding a device open across a long poll would also keep the
 // calculator's own program from being the only USB client.
-int cmdServe(bool once) {
+int cmdServe(bool once, bool use_echo) {
     namespace proto = chatlink::protocol;
+
+    chatlink::model::Config model_config;
+    model_config.api_key = chatlink::model::apiKeyFromEnvironment();
+
+    if (!use_echo && model_config.api_key.empty()) {
+        std::cerr << "error: ANTHROPIC_API_KEY is not set.\n"
+                     "       Set it, or run 'serve --echo' to test the link without a model.\n";
+        return 1;
+    }
 
     // Unbuffered: serve is long-running and usually watched through a redirected
     // log, where default full buffering hides every line until the process ends.
@@ -414,7 +443,15 @@ int cmdServe(bool once) {
 
                 proto::Message reply;
                 reply.sequence = msg.sequence;
-                reply.payload = answerEcho(msg.payload);
+                // The link is closed for the whole model call. That is
+                // deliberate: TI's driver allows a single opener, and holding
+                // it while waiting on the API would block the calculator.
+                if (use_echo) {
+                    reply.payload = answerEcho(msg.payload);
+                } else {
+                    std::cout << "  asking " << model_config.model << "...\n";
+                    reply.payload = answerClaude(model_config, msg.payload);
+                }
 
                 const auto encoded = proto::encode(reply);
                 Device device;
@@ -471,8 +508,16 @@ int main(int argc, char** argv) {
     if (command == "mkdir" && args.size() == 2) return cmdSimpleRemote("mkdir", args[1]);
     if (command == "rmdir" && args.size() == 2) return cmdSimpleRemote("rmdir", args[1]);
     if (command == "shot" && args.size() == 2) return cmdScreenshot(args[1]);
-    if (command == "serve" && args.size() == 1) return cmdServe(false);
-    if (command == "serve" && args.size() == 2 && args[1] == "--once") return cmdServe(true);
+    if (command == "serve") {
+        bool once = false, echo = false;
+        bool bad = false;
+        for (std::size_t i = 1; i < args.size(); ++i) {
+            if (args[i] == "--once") once = true;
+            else if (args[i] == "--echo") echo = true;
+            else bad = true;
+        }
+        if (!bad) return cmdServe(once, echo);
+    }
     if (command == "key" && args.size() == 2) return cmdKey(args[1], dry_run);
 
     // 'type' joins the rest so quoting is optional for simple phrases.

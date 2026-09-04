@@ -1,3 +1,15 @@
+/*
+ * ChatLink - link a TI-Nspire CX to a PC over USB.
+ * Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. See the LICENSE file for the full text.
+ */
+
 // os_input — synthesises real OS-level keyboard and mouse input on Windows.
 //
 // This is deliberately standalone: it knows nothing about calculators, USB or

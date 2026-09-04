@@ -1,3 +1,7 @@
+# ChatLink - link a TI-Nspire CX to a PC over USB.
+# Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # os_input is deliberately free of any calculator or USB dependency: it is the
 # reusable Win32 input layer that both the model bridge and macropad mode use.
 add_library(chatlink_os_input STATIC os_input/os_input.cpp)

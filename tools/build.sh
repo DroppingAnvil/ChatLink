@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ChatLink - link a TI-Nspire CX to a PC over USB.
+# Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Configures and builds ChatLink using the toolchain CLion bundles.
 #
 # CLion ships CMake, Ninja and MinGW-w64 but does not put them on PATH, and gcc

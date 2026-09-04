@@ -1,3 +1,7 @@
+# ChatLink - link a TI-Nspire CX to a PC over USB.
+# Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 cmake_minimum_required(VERSION 3.29)
 project(ChatLink CXX C)
 

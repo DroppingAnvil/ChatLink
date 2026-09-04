@@ -1,4 +1,16 @@
 /*
+ * ChatLink - link a TI-Nspire CX to a PC over USB.
+ * Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. See the LICENSE file for the full text.
+ */
+
+/*
  * Freestanding shims for building Ndless programs against a STOCK
  * arm-none-eabi toolchain (e.g. Ubuntu's gcc-arm-none-eabi) instead of the
  * patched newlib the Ndless SDK builds from source.

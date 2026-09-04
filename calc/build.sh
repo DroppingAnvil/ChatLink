@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ChatLink - link a TI-Nspire CX to a PC over USB.
+# Copyright (C) 2026 Christopher Willett / AnvilDevelopment.US
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Builds a ChatLink calculator program into a runnable .tns.
 #
 # Runs INSIDE the ndless-sdk container, which carries the Ndless toolchain.
