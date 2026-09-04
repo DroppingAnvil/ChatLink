@@ -1,0 +1,34 @@
+ChatLink patches to libnspire (upstream: github.com/Lights0123/libnspire)
+
+Upstream tests _WIN32 where it means _MSC_VER. MinGW-w64 defines _WIN32 but
+is GCC, so it was sent down an MSVC-only path: __pragma(pack(...)), which GCC
+rejects, and a gettimeofday shim that collides with MinGW's own declaration.
+
+--- a/src/services/devinfo.h
++++ b/src/services/devinfo.h
+@@ -19,7 +19,10 @@
+ #define _DEVINFO_H
+ 
+ #include "api/devinfo.h"
+-#ifdef _WIN32
++/* ChatLink patch: __pragma is MSVC-only syntax. MinGW-w64 defines _WIN32
++   too, so the original _WIN32 test sent GCC down the MSVC branch, where it
++   failed with "unknown type name 'pack'". GCC takes the attribute form. */
++#ifdef _MSC_VER
+ #define PACK( ... ) __pragma( pack(push, 1) ) __VA_ARGS__ __pragma( pack(pop))
+ #else
+ #define PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
+--- a/src/cx2.cpp
++++ b/src/cx2.cpp
+@@ -22,7 +22,10 @@
+ #include <cstring>
+ 
+ #include "endianconv.h"
+-#ifdef _WIN32
++/* ChatLink patch: _WIN32 -> _MSC_VER. MinGW-w64 defines _WIN32 but is GCC,
++   so the original test both used MSVC-only __pragma and redefined
++   gettimeofday, which MinGW already declares in <sys/time.h>. */
++#ifdef _MSC_VER
+ #include <sys/timeb.h>
+ #include <sys/types.h>
+ #include <winsock2.h>

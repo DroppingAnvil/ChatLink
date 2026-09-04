@@ -1,0 +1,59 @@
+; ChatLink_WinUSB.inf
+;
+; Binds the TI-Nspire CX (USB\VID_0451&PID_E012) to Microsoft's in-box WinUSB
+; driver, so libusb can claim the device.
+;
+; This file installs NO binary. Every section below either references
+; %SystemRoot%\INF\winusb.inf - a Microsoft-signed, in-box driver package that
+; is already on the machine - or writes a registry value under the device's own
+; key. The driver that ends up loaded is C:\Windows\System32\drivers\winusb.sys,
+; which is WHQL-signed by Microsoft and already present.
+;
+; Windows will warn that the publisher cannot be verified, because this .inf is
+; unsigned. That warning is about this text file, not about the driver being
+; loaded. Choose "Install this driver software anyway".
+;
+; To reverse: Device Manager -> the device -> Update driver -> Browse -> Let me
+; pick from a list -> "TI-Nspire(TM) Handheld Device" (oem120.inf). That package
+; stays in the driver store; installing this one does not remove it.
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = USBDevice
+ClassGuid   = {88BAE032-5A81-49F0-BC3D-A4FF138216D6}
+Provider    = %ProviderName%
+DriverVer   = 09/03/2026,1.0.0.0
+; No CatalogFile entry: this package is deliberately unsigned, and naming a
+; catalog that does not exist would make the install fail outright.
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64
+
+[Standard.NTamd64]
+%DeviceName% = USB_Install, USB\VID_0451&PID_E012
+
+; ---------------------------------------------------------------------------
+; Everything below defers to the in-box winusb.inf rather than defining a
+; driver of its own.
+; ---------------------------------------------------------------------------
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include = winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg = Dev_AddReg
+
+[Dev_AddReg]
+; Publishes a device interface GUID so user-mode code can find the device.
+; This value is unique to ChatLink and is written only under this device's key.
+HKR,,DeviceInterfaceGUIDs,0x00010000,"{14F183E2-7D19-421D-B476-C76AF3E3194A}"
+
+[Strings]
+ProviderName     = "ChatLink"
+ManufacturerName = "Texas Instruments"
+DeviceName       = "TI-Nspire CX (WinUSB - ChatLink)"
